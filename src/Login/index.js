@@ -53,7 +53,7 @@ const LoginText = styled.h1`
     font-weight: bolder;  
   
 `
-const LoginForm =({ loading, loginError,userInfo})=>{
+const LoginForm =({ loading, error,userInfo})=>{
     const dispatch = useDispatch();
     // const navigate = useNavigate()
     const [email, setEmail] = useState("")
@@ -118,7 +118,7 @@ const LoginForm =({ loading, loginError,userInfo})=>{
                         </ButtonDiv>
                     </Form.Item>
                 </Form>
-                {loginError && <Error>{loginError}</Error>}
+                {error && <Error>{error}</Error>}
                 <div>
                     <p>Don't have an account? <a>Create an account</a></p>
                 </div>
@@ -130,7 +130,7 @@ const LoginForm =({ loading, loginError,userInfo})=>{
 const mapStateToProps =state=> {
     return{
         loading: selectLoading(state),
-        loginError: selectError(state),
+        error: selectError(state),
         userInfo: selectUserInfo(state),
         userToken: selectUserToken(state)
     }

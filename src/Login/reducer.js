@@ -13,7 +13,7 @@ export const initialState=
         error:null,
         success:false
     }
-export const login = createAsyncThunk("auth/login",
+export const login = createAsyncThunk("user/login",
     async({email,password},{ rejectWithValue })=>{
     try{
         const res = await authservice.login(email,password);
@@ -37,7 +37,13 @@ const LoginAuthSlice  = createSlice({
     name: "login_auth",
     initialState,
     reducer:{
-
+        logout: (state) => {
+            localStorage.removeItem('access_token') // delete token from storage
+            state.loading = false
+            state.userInfo = null
+            state.userToken = null
+            state.error = null
+        },
     },
     extraReducer: {
         [login.pending]: (state) => {
