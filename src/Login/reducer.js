@@ -1,5 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import authservice from "../services/auth.service";
+import axios from "axios";
 
 const access_token = localStorage.getItem('access_token')
     ? localStorage.getItem('access_token')
@@ -10,57 +11,66 @@ export const initialState=
         loading: false,
         userInfo: null,
         access_token ,
-        error:null,
-        success:false
+        message:"",
+        success:false,
+        error:null
     }
 export const login = createAsyncThunk("user/login",
     async({email,password},{ rejectWithValue })=>{
-    try{
-        const res = await authservice.login(email,password);
-        console.log("nnnnn",res);
+     const res = await axios.post("https://04eb-203-88-144-98.in.ngrok.io/api/v1/login")
+         .then((response)=>{
+         console.log(response)
+         console.log(response.data.error)
+     }).catch((error)=>{
+         console.log("error",error)
+     })
         return res.data
-    }catch(error){
-        if (error.response && error.response.data.message) {
-            return rejectWithValue(error.response.data.message)
-        } else {
-            return rejectWithValue(error.message)
-        }
-    }
     })
 
-export const logout = createAsyncThunk("auth/logout", async () => {
-    await authservice.logout();
-});
+
 
 
 const LoginAuthSlice  = createSlice({
     name: "login_auth",
     initialState,
-    reducer:{
-        logout: (state) => {
-            localStorage.removeItem('access_token') // delete token from storage
-            state.loading = false
-            state.userInfo = null
-            state.userToken = null
-            state.error = null
+    reducers:{
+        addToken: (state,action)=> {
+            state.access_token = localStorage.getItem("access_token")
         },
+        adduser: (state,action)=> {
+            state.userInfo = localStorage.getItem("user")
+        },
+        logOut: (state,action)=> {
+            state.access_token = null
+            localStorage.clear();
+        },
+
     },
     extraReducer: {
         [login.pending]: (state) => {
             state.loading = true
             state.error = null
         },
-        [login.fulfilled]: (state, {payload}) => {
+        [login.fulfilled]: (state, {payload:{error,message,access_token,user}}) => {
             state.loading = false
-            state.userInfo = payload
-            state.access_token = payload.access_token
-
+            state.message = message
+            // if(error){
+            //     state.error = error
+            // }else{
+            //     state.message=msg;
+            //     state.userInfo=user;
+            //     state.userToken=access_token
+            //     localStorage.setItem("msg",msg)
+            //     localStorage.setItem("user",user)
+            //     localStorage.setItem("token",access_token)
+            // }
         },
         [login.rejected]: (state, {payload}) => {
             state.loading = false
-            state.error= payload
+            state.message= payload
+            state.error=payload
         },
     },
 })
-
+export  const { logout,adduser,addToken } = LoginAuthSlice.actions
 export default LoginAuthSlice.reducer

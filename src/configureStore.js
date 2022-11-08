@@ -1,10 +1,24 @@
-import {configureStore} from "@reduxjs/toolkit";
-import LoginAuthSlice from "../src/Login/reducer"
+// import {configureStore} from "@reduxjs/toolkit";
+// import LoginAuthSlice from "../src/Login/reducer"
+//
+// const store = configureStore({
+//     reducer:{
+//      user: LoginAuthSlice,
+//     }
+// })
+//
+// export default store
 
-const store = configureStore({
-    reducer:{
-     user: LoginAuthSlice,
-    }
-})
+import { createStore, applyMiddleware } from "redux";
+import { composeWithDevTools } from "redux-devtools-extension";
+import thunk from "redux-thunk";
+import rootReducer from "./LoginPage/reducer/";
 
-export default store
+const middleware = [thunk];
+
+const store = createStore(
+    rootReducer,
+    composeWithDevTools(applyMiddleware(...middleware))
+);
+
+export default store;

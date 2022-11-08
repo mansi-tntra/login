@@ -1,12 +1,11 @@
-import React, {useState} from "react";
+import React, {useRef, useState} from "react";
 import {Button, Checkbox, Form, Input} from "antd";
 import 'antd/dist/antd.min.css'
 import styled from "styled-components";
-import {useNavigate} from "react-router-dom";
-import {selectError, selectLoading, selectUserInfo, selectUserToken} from "./selector";
-import {login} from "./reducer";
-import {connect, useDispatch} from "react-redux";
+import {Navigate, useNavigate} from "react-router-dom";
+import {connect, useDispatch, useSelector} from "react-redux";
 import Error from "../Error/ErrorComponent";
+import {login} from "./action/auth";
 const StyleLogin = styled.div`
     display: flex;
     flex-direction: column;
@@ -53,16 +52,32 @@ const LoginText = styled.h1`
     font-weight: bolder;  
   
 `
-const LoginForm =({ loading, message,userInfo})=>{
+const LoginForm =()=>{
     const dispatch = useDispatch();
     const navigate = useNavigate()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [loading, setLoading] = useState(false);
+    const { isLoggedIn } = useSelector(state => state.auth);
+    const { message } = useSelector(state => state.auth);
+    console.log(message)
     const handleLogin =()=>{
         console.log(email ,password)
-        console.log("Login ")
-        const Dispatch = dispatch(login({email,password}))
-        console.log(Dispatch)
+        setLoading(true);
+        dispatch(login(email, password))
+            .then(() => {
+                navigate("/home");
+
+            })
+            .catch(() => {
+                setLoading(false);
+            });
+    }
+    const routeButton = () =>{
+        navigate("/register");
+    }
+    if (isLoggedIn) {
+        return <Navigate to="/home" />;
     }
     return(
         <StyleLogin>
@@ -99,10 +114,7 @@ const LoginForm =({ loading, message,userInfo})=>{
                                 required: true,
                                 message: 'Please input your Password'
                             },
-                            {
-                                pattern: /^(?!.*\s)(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[~`!@#$%^&*()--+={}\[\]|\\:;"'<>,.?/_₹]).{10,16}$/,
-                                message: 'Please Enter Strong Password',
-                            }
+
                         ]}
                     ><Input.Password  value={password} placeholder='Enter Password'  onChange={(e)=>setPassword(e.target.value)}/>
                     </Form.Item>
@@ -118,29 +130,14 @@ const LoginForm =({ loading, message,userInfo})=>{
                         </ButtonDiv>
                     </Form.Item>
                 </Form>
-                {message && <Error>{message}</Error>}
+
                 <div>
-                    <p>Don't have an account? <a>Create an account</a></p>
+                    <p>Don't have an account? <a onClick={()=>routeButton()}>Create an account</a></p>
                 </div>
+                {message && <Error>{message}</Error>}
             </WapperLogin>
         </StyleLogin>
     )
 
 }
-const mapStateToProps =state=> {
-    return{
-        loading: selectLoading(state),
-        message: selectError(state),
-        userInfo: selectUserInfo(state),
-        userToken: selectUserToken(state)
-    }
-}
-export function mapDispatchToProps(dispatch) {
-    return{
-        loginAuth: ({data})=>{
-            dispatch(login(data))
-        }
-    }
-
-}
-export default connect(mapStateToProps,mapDispatchToProps)(LoginForm)
+export default LoginForm
